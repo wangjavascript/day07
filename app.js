@@ -87,7 +87,11 @@ router.get('/api/del', async ctx => {
 
 //改
 router.post('/api/edit', async ctx => {
-    let { id, name,phone } = ctx.request.body
+    let {
+        id,
+        name,
+        phone
+    } = ctx.request.body
     if (id && name && phone) {
         try {
             await query('update userlist2 set name=?,phone=? where id=?', [name, phone, id])
@@ -108,6 +112,30 @@ router.post('/api/edit', async ctx => {
         }
     }
 })
+
+//模糊搜索
+router.get('/api/search', async ctx => {
+    let { key } = ctx.query
+    let sql = ''
+    if (!key) {
+        spq = 'select * from userlist2'
+    } else {
+        sql = `select * from userlist2 where name like '%${key}%'`
+    }
+    try {
+        let list = await query(sql)
+        ctx.body = {
+            code: 1,
+            data: list
+        }
+    } catch (e) {
+        ctx.body = {
+            code: 0,
+            data: e
+        }
+    }
+})
+
 
 app.listen(process.env.PORT || 3000, () => {
     console.log('服务启动成功')
